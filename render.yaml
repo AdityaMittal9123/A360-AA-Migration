@@ -36,5 +36,5 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm run preview -- --port $PORT --host 0.0.0.0
     envVars:
-      - key: VITE_API_BASE
-        sync: false   # set to your API URL, e.g. https://a360-migration-api.onrender.com (read at build time)
+      - key: PROXY_API_URL
+        sync: false   # set to your API URL, e.g. https://a360-migration-api.onrender.com (Vite preview proxies /api to it; no CORS needed)

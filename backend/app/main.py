@@ -31,6 +31,11 @@ app.include_router(projects.router)
 app.include_router(config.router)
 
 
+@app.get("/")
+def root():
+    return {"app": "A360 Migration Studio API", "docs": "/docs", "health": "/api/health"}
+
+
 @app.get("/api/health")
 def health():
     from urllib.parse import urlsplit
