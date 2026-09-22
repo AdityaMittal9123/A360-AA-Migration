@@ -8,11 +8,22 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 DB_TYPE = os.getenv("DB_TYPE", "sqlite").strip().lower()
 
+
+def _psycopg(url: str) -> str:
+    """Render injects DATABASE_URL as `postgresql://…`, which SQLAlchemy maps to the
+    psycopg2 dialect. We ship psycopg v3, so force the `+psycopg` URL scheme."""
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    if url.startswith("postgresql+psycopg2://"):
+        return "postgresql+psycopg://" + url[len("postgresql+psycopg2://"):]
+    return url
+
+
 if DB_TYPE == "postgresql":
-    DATABASE_URL = os.getenv("DATABASE_URL") or (
-        f"postgresql+psycopg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
+    DATABASE_URL = _psycopg(os.getenv("DATABASE_URL") or (
+        f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
         f"@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '5432')}/{os.getenv('DB_NAME')}"
-    )
+    ))
     connect_args = {}
 else:
     DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./migration.db")
