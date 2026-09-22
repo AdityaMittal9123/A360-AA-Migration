@@ -1,0 +1,40 @@
+# Render Blueprint — deploy via: New + Blueprint, or from the repo with render.yaml at the root.
+# Provisioned: 1 Postgres database + API web service + UI web service.
+# Tables are created automatically on the API's first start (SQLAlchemy create_all in app/main.py).
+
+databases:
+  - name: a360-migration-db
+    databaseName: a360_migration
+    user: a360_migration
+    plan: free
+
+services:
+  - type: web
+    name: a360-migration-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_TYPE
+        value: postgresql
+      - key: DATABASE_URL
+        fromDatabase:
+          name: a360-migration-db
+          property: connectionString
+      - key: CORS_ORIGINS
+        sync: false   # set to your UI URL, e.g. https://a360-migration-ui.onrender.com
+      - key: PYTHON_VERSION
+        value: 3.11.7
+
+  - type: web
+    name: a360-migration-ui
+    runtime: node
+    rootDir: frontend
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run preview -- --port $PORT --host 0.0.0.0
+    envVars:
+      - key: VITE_API_BASE
+        sync: false   # set to your API URL, e.g. https://a360-migration-api.onrender.com (read at build time)

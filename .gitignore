@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.db
+.env
+backend/.env
+backend/.env.example
+migration.db
